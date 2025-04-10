@@ -27,6 +27,7 @@ namespace Medianiz.Tests.UnitTests
             // Registering Assemblies
             services.AddMedianiz(typeof(CreateOrderHandler), typeof(OrderPaidEventHandler));
 
+
             var mockLogger = new Mock<ILogger<OrderPaidEventHandler>>();
 
             services.AddSingleton<IOrderRepository, OrderRepository>();
@@ -43,9 +44,9 @@ namespace Medianiz.Tests.UnitTests
                 x => x.Log(
                     LogLevel.Information,
                     It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString().Contains($"Order {orderId} paid")),
+                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Order {orderId} paid")),
                     null,
-                    It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
                 Times.Once);
 
             // Assert - Validation
