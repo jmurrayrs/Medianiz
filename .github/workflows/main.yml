@@ -27,5 +27,5 @@ jobs:
       run: dotnet pack --configuration Release
 
     - name: Publish
-      run: dotnet nuget push "src/Mediator/bin/Release/*.nupkg" -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json --skip-duplicate
+      run: dotnet nuget push "Medianiz/src/Mediator/bin/Release/*.nupkg" -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json --skip-duplicate
       
