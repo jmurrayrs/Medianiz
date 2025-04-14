@@ -1,16 +1,16 @@
+using Medianiz.Tests.DDD.Domain.Events;
 using Medianiz.Tests.DDD.Domain.Interfaces;
-using Medianiz.Tests.DDD.Extensions;
 using Mediator;
 using Mediator.Interfaces;
 
 namespace Medianiz.Tests.DDD.Application.Commands
 {
-    public class MarkOrderAsPaidHandler : IRequestHandler<MarkOrderAsPaidCommand, Unit>
+    public class MarkOrderAsPaidCommandHandler : IRequestHandler<MarkOrderAsPaidCommand, Unit>
     {
         private readonly IOrderRepository _repository;
         private readonly IMedianiz _mediator;
 
-        public MarkOrderAsPaidHandler(IOrderRepository repository, IMedianiz mediator)
+        public MarkOrderAsPaidCommandHandler(IOrderRepository repository, IMedianiz mediator)
         {
             _repository = repository;
             _mediator = mediator;
@@ -20,9 +20,12 @@ namespace Medianiz.Tests.DDD.Application.Commands
         {
             var order = await _repository.GetByIdAsync(request.OrderId);
             order.MarkAsPaid();
+
+            await _mediator.Publish(new OrderPaidEvent(order.Id), cancellationToken);
+
             await _repository.UpdateAsync(order);
 
-            await _mediator.PublishDomainEvents(order);
+
             return Unit.Value;
         }
     }
