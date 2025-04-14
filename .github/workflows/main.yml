@@ -24,7 +24,7 @@ jobs:
       run: dotnet test
 
     - name: Create the Package
-      run: dotnet pack Medianiz/src/Mediator/Mediator.csproj --configuration Release
+      run: dotnet pack Medianiz/src/Mediator/Medianiz.csproj --configuration Release
 
     - name: Publish
       run: dotnet nuget push "src/Mediator/bin/Release/*.nupkg" -k ${{ secrets.NUGET_TOKEN }} -s https://api.nuget.org/v3/index.json --skip-duplicate
