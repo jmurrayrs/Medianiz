@@ -2,7 +2,7 @@
 
 [![NuGet Version](https://img.shields.io/nuget/v/Medianiz.svg)](https://www.nuget.org/packages/Medianiz/)
 [![.NET Standard](https://img.shields.io/badge/.NET-Standard%202.1+-blue)](https://docs.microsoft.com/en-us/dotnet/standard/net-standard)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-GPL-green.svg)](LICENSE)
 
 A lightweight implementation of the mediator pattern for .NET applications, designed to simplify in-process messaging.
 

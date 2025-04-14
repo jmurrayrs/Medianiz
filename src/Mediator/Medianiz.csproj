@@ -1,10 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net9.0</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LangVersion>latest</LangVersion>
     <PackageId>Medianiz</PackageId>
     <Version>1.0.0-beta</Version>
-    <icon></icon>
+    <icon>https://github.com/jmurrayrs/Medianiz/blob/main/media/icon.png</icon>
     <License>MIT</License>
     <Authors>Julien Nascimento</Authors>
     <Company>Haidai Tech</Company>
@@ -21,6 +22,10 @@
     <Summary>A implementation of the mediator pattern for .NET applications</Summary>
     <PackageReadmeFile>Readme.md</PackageReadmeFile>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\..\media\icon.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\Readme.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
   </ItemGroup>
