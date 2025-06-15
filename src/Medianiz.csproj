@@ -4,7 +4,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <LangVersion>latest</LangVersion>
     <PackageId>Medianiz</PackageId>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <icon>https://github.com/jmurrayrs/Medianiz/blob/main/media/icon.png</icon>
     <License>MIT</License>
     <Authors>Julien Nascimento</Authors>
