@@ -6,6 +6,10 @@
 
 A lightweight implementation of the mediator pattern for .NET applications, designed to simplify in-process messaging.
 
+## Release Versions
+
+- **2.0.0:**  The project was updated to .NET 10.
+
 ## Key Features
 
 - Simple request/response handling
