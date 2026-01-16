@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Mediator.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using static Medianiz.Interfaces.IPipelineBehavior;
 
 namespace Mediator
 {
@@ -25,11 +26,11 @@ namespace Mediator
             _serviceProvider = serviceProvider;
         }
 
-        ///<inheritdoc/>
+        ///<inheritdoc/>      
+
         public async Task<TResponse> Send<TResponse>(
             IRequest<TResponse> request,
-            CancellationToken cancellationToken = default
-        )
+            CancellationToken cancellationToken = default)
         {
             var requestType = request.GetType();
             var responseType = typeof(TResponse);
@@ -37,34 +38,39 @@ namespace Mediator
             var handler = _serviceProvider.GetService(handlerInterfaceType);
 
             if (handler == null)
-            {
                 throw new InvalidOperationException($"Handler not found for {requestType.Name}");
-            }
 
-            // Método 1: Busca na implementação concreta
-            var method = handler.GetType().GetMethod("Handle", new[] { requestType, typeof(CancellationToken) });
-
-            // Método 2: Busca na interface (para implementações explícitas)
-            if (method == null)
+            // Delegate para chamar o handler via reflection
+            RequestHandlerDelegate<TResponse> handlerDelegate = () =>
             {
-                method = handlerInterfaceType.GetMethod("Handle", new[] { requestType });
-            }
+                var method = handler.GetType().GetMethod("Handle",
+                    new[] { requestType, typeof(CancellationToken) }) ??
+                            handlerInterfaceType.GetMethod("Handle", new[] { requestType });
 
-            if (method == null)
-            {
-                throw new InvalidOperationException($"Handle method not found on {handler.GetType().Name}");
-            }
+                if (method == null)
+                    throw new InvalidOperationException($"Handle method not found on {handler.GetType().Name}");
 
-            try
-            {
                 var result = method.Invoke(handler, new object[] { request, cancellationToken });
-                return await (Task<TResponse>)result;
-            }
-            catch (TargetInvocationException ex)
+                return (Task<TResponse>)result;
+            };
+
+            // Resolver todos os behaviors
+            var pipelineBehaviorType = typeof(IPipelineBehavior<,>).MakeGenericType(requestType, responseType);
+            var behaviors = _serviceProvider.GetServices(pipelineBehaviorType)
+                .Cast<dynamic>() // reflection não conhece os tipos
+                .Reverse()
+                .ToList();
+
+            // Construir pipeline encadeado
+            foreach (var behavior in behaviors)
             {
-                throw ex.InnerException ?? ex;
+                var next = handlerDelegate;
+                handlerDelegate = () => behavior.Handle((dynamic)request, next, cancellationToken);
             }
+
+            return await handlerDelegate();
         }
+
 
         ///<inheritdoc/>
         public async Task Publish<TNotification>(TNotification notification, CancellationToken cancellationToken = default)

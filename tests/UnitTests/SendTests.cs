@@ -1,6 +1,8 @@
+using Medianiz.Tests.UnitTests.Shared;
 using Mediator.Extensions;
 using Mediator.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using static Medianiz.Interfaces.IPipelineBehavior;
 
 namespace Medianiz.Tests.UnitTests
 {
@@ -26,5 +28,38 @@ namespace Medianiz.Tests.UnitTests
 
             Assert.Equal("Pong", result);
         }
+        [Fact]
+        public async Task Send_Should_Invoke_Handler()
+        {
+            var services = new ServiceCollection();
+            services.AddMedianiz(typeof(TestRequestHandler));
+            var provider = services.BuildServiceProvider();
+            var mediator = provider.GetRequiredService<IMedianiz>();
+
+            var result = await mediator.Send(new TestRequest("Hello"));
+
+            Assert.Equal("Handled: Hello", result);
+        }
+
+        [Fact]
+        public async Task Send_Should_Invoke_Behavior()
+        {
+            var called = false;
+
+            var services = new ServiceCollection();
+            services.AddMedianiz(typeof(TestRequestHandler));
+            services.AddScoped<IPipelineBehavior<TestRequest, string>>(_ => new TestBehavior(() => called = true));
+            var provider = services.BuildServiceProvider();
+            var mediator = provider.GetRequiredService<IMedianiz>();
+
+            var result = await mediator.Send(new TestRequest("Hello"));
+
+            Assert.True(called);
+            Assert.Equal("Handled: Hello", result);
+        }
     }
+
+
+
+
 }

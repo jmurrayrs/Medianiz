@@ -1,4 +1,7 @@
+using Medianiz.Tests.UnitTests.Shared;
 using Mediator;
+using Mediator.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Medianiz.Tests.UnitTests
 {

@@ -8,7 +8,53 @@ A lightweight implementation of the mediator pattern for .NET applications, desi
 
 ## Release Versions
 
-- **2.0.0:**  The project was updated to .NET 10.
+- **2.1.0:**  Some libraries were updated and Medianiz has implementation of Pipeline Behaviors.
+
+## Pipeline Behaviors
+
+Medianiz supports **Pipeline Behaviors**, allowing cross-cutting logic to be executed before and/or after a request handler, following the same model used by MediatR’s `IPipelineBehavior`.
+
+This feature is useful for implementing concerns such as:
+
+- Logging
+- Validation
+- Transactions
+- Metrics
+- Exception handling
+
+---
+
+### Concept
+
+A *Pipeline Behavior* wraps the execution of a request handler and can:
+
+- Execute code **before** the handler
+- Execute code **after** the handler
+- Stop execution by throwing exceptions
+- Decorate or modify the response
+
+Execution is performed as a chained pipeline.
+
+---
+
+### `IPipelineBehavior` Interface
+
+```csharp
+public delegate Task<TResponse> RequestHandlerDelegate<TResponse>();
+
+public interface IPipelineBehavior<in TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
+{
+    Task<TResponse> Handle(
+        TRequest request,
+        RequestHandlerDelegate<TResponse> next,
+        CancellationToken cancellationToken
+    );
+}
+```
+
+
+# DOCUMENTATION
 
 ## Key Features
 
