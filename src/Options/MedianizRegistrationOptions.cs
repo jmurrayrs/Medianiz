@@ -17,10 +17,35 @@ namespace Mediator.Options
             return this;
         }
 
+        public MedianizRegistrationOptions RegisterHandlersFromAssembly(Type assemblyMarker)
+        {
+            if (assemblyMarker is null)
+            {
+                throw new ArgumentNullException(nameof(assemblyMarker));
+            }
+
+            return AddAssembly(assemblyMarker.Assembly);
+        }
+
+        public MedianizRegistrationOptions RegisterHandlersFromAssembly(Assembly assembly)
+        {
+            if (assembly is null)
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
+
+            return AddAssembly(assembly);
+        }
+
         public MedianizRegistrationOptions AddHandler<THandler>() where THandler : class
         {
             ExplicitHandlers.Add(typeof(THandler));
             return this;
+        }
+
+        public MedianizRegistrationOptions RegisterHandler<THandler>() where THandler : class
+        {
+            return AddHandler<THandler>();
         }
 
         public MedianizRegistrationOptions SetLifetime(ServiceLifetime lifetime)

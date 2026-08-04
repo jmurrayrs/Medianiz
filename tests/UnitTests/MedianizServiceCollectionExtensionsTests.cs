@@ -113,6 +113,27 @@ namespace Medianiz.Tests.UnitTests
             Assert.Contains(services, x =>
                 x.ServiceType == typeof(IRequestHandler<AnotherCommand, Unit>));
         }
+
+        [Fact]
+        public void AddMedianiz_With_Configuration_Should_Register_Handlers_From_Assembly_Marker()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+
+            // Act
+            services.AddMedianiz(config =>
+            {
+                config.RegisterHandlersFromAssembly(typeof(TestCommandHandler));
+                config.RegisterHandler<TestCommandHandler>();
+            });
+
+            // Assert
+            Assert.Contains(services, x =>
+                x.ServiceType == typeof(IRequestHandler<TestCommand, string>));
+
+            Assert.Contains(services, x =>
+                x.ServiceType == typeof(INotificationHandler<TestEvent>));
+        }
     }
 
     // Helper types for multi-assembly test
