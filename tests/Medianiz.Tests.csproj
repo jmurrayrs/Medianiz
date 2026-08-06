@@ -23,7 +23,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Fixtures/**/*.cs" />
+    <Compile Remove="Fixtures/**/obj/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\src\Medianiz.csproj" />
+    <ProjectReference Include="Fixtures\Medianiz.Tests.WebApiSimulation\Medianiz.Tests.WebApiSimulation.csproj" />
   </ItemGroup>
 
 </Project>

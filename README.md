@@ -7,7 +7,8 @@
 A lightweight implementation of the mediator pattern for .NET applications, designed to simplify in-process messaging.
 
 ## Release Versions
-
+- **2.2.1:** Fixed handler discovery for `services.AddMedianiz(config => config.RegisterHandlersFromAssembly(typeof(Program)))` in WebAPI/DDD solutions. Medianiz now scans the non-framework assemblies referenced by the marker assembly, so handlers from layers such as Application are registered automatically.
+- **2.2.0:**  Some libraries were updated and RegisterHandlersFromAssembly was implemented.
 - **2.1.0:**  Some libraries were updated and Medianiz has implementation of Pipeline Behaviors.
 
 ## Pipeline Behaviors
@@ -190,6 +191,21 @@ services.AddMedianiz(config =>
     config.RegisterHandlersFromAssembly(typeof(Program));
     config.RegisterHandler<SpecialHandler>(); // Manual registration
 });
+```
+
+When you use a Web API marker such as `typeof(Program)`, Medianiz also scans the non-framework assemblies referenced by that project so handlers in your Application layer are discovered automatically.
+
+Example in a DDD solution:
+
+```csharp
+// Civika.API
+services.AddMedianiz(config =>
+{
+    config.RegisterHandlersFromAssembly(typeof(Program));
+});
+
+// QueryDesempenhoMunicipioCommandHandler can live in Civika.Application
+// and will still be registered automatically if Civika.API references it.
 ```
 
 ### Lifecycle Management

@@ -1,6 +1,7 @@
 using Mediator;
 using Mediator.Extensions;
 using Mediator.Interfaces;
+using Medianiz.Tests.WebApiSimulation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Medianiz.Tests.UnitTests
@@ -134,6 +135,27 @@ namespace Medianiz.Tests.UnitTests
             Assert.Contains(services, x =>
                 x.ServiceType == typeof(INotificationHandler<TestEvent>));
         }
+
+        [Fact]
+        public async Task AddMedianiz_With_Configuration_Should_Register_Handlers_From_Program_Assembly_References()
+        {
+            // Arrange
+            var services = new ServiceCollection();
+
+            services.AddMedianiz(config =>
+            {
+                config.RegisterHandlersFromAssembly(typeof(WebApiProgramMarker));
+            });
+
+            await using var provider = services.BuildServiceProvider().CreateAsyncScope();
+            var mediator = provider.ServiceProvider.GetRequiredService<IMedianiz>();
+
+            // Act
+            var response = await mediator.Send(new QueryDesempenhoMunicipioCommand(42));
+
+            // Assert
+            Assert.Equal("municipio:42", response);
+        }
     }
 
     // Helper types for multi-assembly test
@@ -143,4 +165,6 @@ namespace Medianiz.Tests.UnitTests
         public Task<Unit> Handle(AnotherCommand request, CancellationToken ct)
             => Task.FromResult(Unit.Value);
     }
+
+    public sealed class WebApiProgramMarker;
 }

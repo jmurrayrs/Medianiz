@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Mediator.Interfaces;
@@ -20,7 +21,7 @@ namespace Mediator.Extensions
         /// <returns>The service collection for chaining</returns>
         public static IServiceCollection AddMedianiz(this IServiceCollection services, params Type[] assemblyMarkers)
         {
-            var assemblies = assemblyMarkers.Select(t => t.Assembly).ToArray();
+            var assemblies = ResolveHandlerAssemblies(assemblyMarkers.Select(t => t.Assembly));
 
 
             services.RegisterGenericHandlers(typeof(IRequestHandler<,>), assemblies);
@@ -44,14 +45,14 @@ namespace Mediator.Extensions
         {
             var options = new MedianizRegistrationOptions();
             configure(options);
+            var assemblies = ResolveHandlerAssemblies(options.Assemblies);
 
             // Obter os tipos genéricos uma vez
             Type requestHandlerType = typeof(IRequestHandler<,>);
             Type notificationHandlerType = typeof(INotificationHandler<>);
 
             // Registrar handlers dos assemblies
-            options.Assemblies
-                .Distinct()
+            assemblies
                 .ToList()
                 .ForEach(assembly =>
                 {
@@ -117,13 +118,58 @@ namespace Mediator.Extensions
             ServiceLifetime lifetime,
             params Type[] assemblyMarkers)
         {
-            var assemblies = assemblyMarkers
-                .Select(t => t.Assembly)
-                .ToArray();
+            var assemblies = ResolveHandlerAssemblies(assemblyMarkers.Select(t => t.Assembly));
 
             RegisterHandlersWithLifetime(services, assemblies, lifetime);
 
             return services.AddScoped<IMedianiz, Medianiz>();
+        }
+
+        private static Assembly[] ResolveHandlerAssemblies(IEnumerable<Assembly> markerAssemblies)
+        {
+            var assembliesToScan = new List<Assembly>();
+            var pendingAssemblies = new Queue<Assembly>(
+                markerAssemblies
+                    .Where(assembly => assembly != null)
+                    .Distinct());
+            var discoveredAssemblies = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            while (pendingAssemblies.Count > 0)
+            {
+                var assembly = pendingAssemblies.Dequeue();
+
+                if (!discoveredAssemblies.Add(assembly.FullName ?? assembly.GetName().Name ?? string.Empty))
+                {
+                    continue;
+                }
+
+                assembliesToScan.Add(assembly);
+
+                foreach (var referencedAssemblyName in assembly.GetReferencedAssemblies()
+                    .Where(ShouldScanReferencedAssembly))
+                {
+                    pendingAssemblies.Enqueue(Assembly.Load(referencedAssemblyName));
+                }
+            }
+
+            return assembliesToScan.ToArray();
+        }
+
+        private static bool ShouldScanReferencedAssembly(AssemblyName assemblyName)
+        {
+            var name = assemblyName.Name;
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
+
+            return name != "System"
+                && name != "mscorlib"
+                && name != "netstandard"
+                && name != "Microsoft"
+                && !name.StartsWith("System.", StringComparison.Ordinal)
+                && !name.StartsWith("Microsoft.", StringComparison.Ordinal);
         }
 
         /// <summary>
